@@ -23,19 +23,26 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder holder;
     private List<RndSquare>  squares = new ArrayList<>();
     private Random random = new Random();
+    private GameLoop gameLoop;
 
     public GamePanel(Context context) {
         super(context);
         holder = getHolder();
         holder.addCallback(this);
         redPaint.setColor(Color.RED);
+        gameLoop = new GameLoop(this);
+
     }
 
-    private void render(){
+    public void render(){
         Canvas c = holder.lockCanvas();
         c.drawColor(Color.BLACK);
         squares.forEach( square -> square.draw(c));
         holder.unlockCanvasAndPost(c);
+    }
+
+    public void update(){
+        squares.forEach(RndSquare::move);
     }
 
     @Override
@@ -46,14 +53,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             int color = Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
             int size = 25 + random.nextInt(101);
             squares.add(new RndSquare(pos, color, size));
-            render();
+//            render();
+//            update();
         }
         return true;
     }
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        render();
+        gameLoop.startGameLoog();
     }
 
     @Override
@@ -70,12 +78,24 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         private PointF pos;
         private int size;
         private Paint paint;
+        private int xdir= 1;
+        private int ydir= 1;
 
         public RndSquare(PointF pos, int color, int size) {
             this.pos = pos;
             this.size = size;
             paint = new Paint();
             paint.setColor(color);
+        }
+
+        public  void move(){
+            pos.x += xdir*5;
+            if(pos.x >= 1090 || pos.x <= 0)
+                xdir *= -1;
+
+            pos.y += ydir*5;
+            if(pos.y >= 1920 || pos.y <= 0)
+                ydir *= -1;
         }
 
         public void draw(Canvas c) {
